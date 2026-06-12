@@ -1,3 +1,8 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -46,11 +51,24 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#contacto">Contacto</a>
                     </li>
-                    <li class="nav-item ms-lg-3">
-                        <a class="btn btn-agro" href="#acceso">
-                            <i class="fa-solid fa-right-to-bracket me-2"></i>Acceso al Sistema
-                        </a>
-                    </li>
+                    <?php if (isset($_SESSION['usuario_id'])): ?>
+                        <li class="nav-item dropdown ms-lg-3">
+                            <a class="btn btn-agro dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid fa-circle-user me-2"></i><?php echo explode(' ', $_SESSION['usuario_nombre'])[0]; ?>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-2">
+                                <li><span class="dropdown-item-text text-muted small"><i class="fa-solid fa-circle text-success me-1"></i> Rol: <?php echo ucfirst($_SESSION['usuario_rol']); ?></span></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="controladores/AuthController.php?action=logout"><i class="fa-solid fa-right-from-bracket me-2"></i>Cerrar Sesión</a></li>
+                            </ul>
+                        </li>
+                    <?php else: ?>
+                        <li class="nav-item ms-lg-3">
+                            <a class="btn btn-agro" href="views/auth/login.php">
+                                <i class="fa-solid fa-right-to-bracket me-2"></i>Acceso al Sistema
+                            </a>
+                        </li>
+                    <?php endif; ?>
                 </ul>
             </div>
         </div>
@@ -65,9 +83,15 @@
                     <h1 class="display-4 mb-3">Gestión Profesional de Insumos Agrícolas</h1>
                     <p class="lead text-muted mb-4">Optimice su stock de semillas, fertilizantes, abonos y agroquímicos con nuestro sistema especializado de inventario, facturación y control de ventas.</p>
                     <div class="d-flex flex-wrap gap-3">
-                        <a href="#acceso" class="btn btn-agro btn-lg">
-                            <i class="fa-solid fa-user-lock me-2"></i>Ingresar al Portal
-                        </a>
+                        <?php if (isset($_SESSION['usuario_id'])): ?>
+                            <a href="#caracteristicas" class="btn btn-agro btn-lg">
+                                <i class="fa-solid fa-circle-check me-2"></i>Sesión Activa
+                            </a>
+                        <?php else: ?>
+                            <a href="views/auth/login.php" class="btn btn-agro btn-lg">
+                                <i class="fa-solid fa-user-lock me-2"></i>Ingresar al Portal
+                            </a>
+                        <?php endif; ?>
                         <a href="#simulador" class="btn btn-agro-secondary btn-lg">
                             <i class="fa-solid fa-circle-play me-2"></i>Probar Simulador
                         </a>
@@ -294,64 +318,40 @@
         <div class="container py-5">
             <div class="row justify-content-center">
                 <div class="col-md-8 col-lg-6">
-                    <div class="text-center mb-5">
+                    <div class="text-center mb-4">
                         <h2 class="section-title">Acceso al Sistema</h2>
-                        <p class="text-muted">Ingrese sus credenciales de acuerdo a su rol asignado en el sistema.</p>
+                        <p class="text-muted">Portal seguro de inicio de sesión y registro de AgroStock.</p>
                     </div>
 
-                    <div class="card login-card">
-                        <!-- Navigation Tabs for Roles -->
-                        <ul class="nav nav-tabs nav-fill login-nav-tabs" id="loginTabs" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin" type="button" role="tab" aria-controls="admin" aria-selected="true" onclick="actualizarCredencialesDemo('administrador')">
-                                    <i class="fa-solid fa-user-tie me-2"></i>Admin
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="vendedor-tab" data-bs-toggle="tab" data-bs-target="#vendedor" type="button" role="tab" aria-controls="vendedor" aria-selected="false" onclick="actualizarCredencialesDemo('vendedor')">
-                                    <i class="fa-solid fa-store me-2"></i>Vendedor
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="cliente-tab" data-bs-toggle="tab" data-bs-target="#cliente" type="button" role="tab" aria-controls="cliente" aria-selected="false" onclick="actualizarCredencialesDemo('cliente')">
-                                    <i class="fa-solid fa-tractor me-2"></i>Cliente
-                                </button>
-                            </li>
-                        </ul>
-
-                        <div class="login-form-body">
-                            <h4 class="mb-4 text-center text-primary" id="login-title">Inicio de Sesión - Administrador</h4>
-                            
-                            <form id="loginForm" onsubmit="realizarLoginDemo(event)">
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Correo Electrónico</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-solid fa-envelope"></i></span>
-                                        <input type="email" class="form-control form-control-agro border-start-0" id="email" placeholder="correo@ejemplo.com" required value="admin@agrostock.com">
-                                    </div>
-                                </div>
-                                <div class="mb-4">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <label for="password" class="form-label mb-0">Contraseña</label>
-                                        <a href="#" class="text-secondary text-decoration-none" style="font-size: 0.85rem;" onclick="alert('Funcionalidad de recuperación de contraseña: Se enviará un enlace de restablecimiento al correo electrónico.')">¿Olvidó su contraseña?</a>
-                                    </div>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-solid fa-lock"></i></span>
-                                        <input type="password" class="form-control form-control-agro border-start-0" id="password" placeholder="••••••••" required value="admin123">
-                                    </div>
-                                </div>
-                                
-                                <div class="d-grid mb-3">
-                                    <button type="submit" class="btn btn-agro btn-lg">Ingresar</button>
-                                </div>
-
-                                <div class="text-center">
-                                    <button type="button" class="btn btn-link text-success text-decoration-none" onclick="cargarCredencialesAuto()">
-                                        <i class="fa-solid fa-magic-wand-sparkles me-2"></i>Cargar credenciales de prueba
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                    <div class="card glass-panel text-center p-5 border-0 shadow-lg rounded-4">
+                        <?php if (isset($_SESSION['usuario_id'])): ?>
+                            <div class="mb-4">
+                                <i class="fa-solid fa-circle-user text-success display-1 mb-3"></i>
+                                <h3>¡Sesión Activa!</h3>
+                                <p class="text-muted mb-1">Bienvenido de nuevo, <strong><?php echo $_SESSION['usuario_nombre']; ?></strong>.</p>
+                                <span class="badge bg-success py-2 px-3 rounded-pill mb-3">Rol: <?php echo ucfirst($_SESSION['usuario_rol']); ?></span>
+                                <p class="small text-muted">Correo: <?php echo $_SESSION['usuario_email']; ?></p>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a href="controladores/AuthController.php?action=logout" class="btn btn-danger py-3">
+                                    <i class="fa-solid fa-right-from-bracket me-2"></i>Cerrar Sesión Activa
+                                </a>
+                            </div>
+                        <?php else: ?>
+                            <div class="mb-4">
+                                <i class="fa-solid fa-shield-halved text-success display-4 mb-3"></i>
+                                <h3>Acceso Seguro</h3>
+                                <p class="text-muted">Para garantizar la protección de sus datos comerciales y financieros, el módulo de acceso ahora utiliza hashing criptográfico de grado militar y control de sesión aislado.</p>
+                            </div>
+                            <div class="d-grid gap-3">
+                                <a href="views/auth/login.php" class="btn btn-agro btn-lg py-3">
+                                    <i class="fa-solid fa-user-lock me-2"></i>Ir al Inicio de Sesión
+                                </a>
+                                <a href="views/auth/register.php" class="btn btn-agro-secondary btn-lg py-3">
+                                    <i class="fa-solid fa-user-plus me-2"></i>Registrar Nueva Cuenta
+                                </a>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
